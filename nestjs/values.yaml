@@ -1,0 +1,32 @@
+replicaCount: 1
+
+image:
+  repository: ""
+  tag: ""
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 3000
+
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations: {}
+  hosts:
+    - host: example.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: tls-secret
+      hosts:
+        - example.com
+
+resources: {}
+
+env: []
+secretEnv: []
+
+volumes: []
+volumeMounts: []
