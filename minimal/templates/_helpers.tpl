@@ -1,6 +1,4 @@
-{{/*
-  Split dotenv в список непустых строк без комментариев
-*/}}
+{{/* ===== parseLines: вернёт YAML-массив строк (без пустых и #комментариев) ===== */}}
 {{- define "env.parseLines" -}}
 {{- $dotenv := . | default "" -}}
 {{- $lines := splitList "\n" $dotenv -}}
@@ -11,84 +9,64 @@
     {{- $clean = append $clean $line -}}
   {{- end }}
 {{- end }}
-{{- return $clean -}}
+{{- toYaml $clean -}}
 {{- end -}}
 
-{{/*
-  Разбор пары key=value: берём всё правее первого "=" как value.
-  Результат: dict "key" k "val" v
-*/}}
+{{/* ===== splitKV: "KEY=VALUE" -> YAML-объект {key:..., val:...} ===== */}}
 {{- define "env.splitKV" -}}
-{{- $line := . -}}
-{{- $parts := regexSplit "=" $line 2 -}}
+{{- $parts := regexSplit "=" . 2 -}}
 {{- $k := trim (index $parts 0) -}}
 {{- $v := "" -}}
 {{- if gt (len $parts) 1 }}{{- $v = trim (index $parts 1) -}}{{- end -}}
 {{- $v = (trimAll "'" (trimAll "\"" $v)) -}}
-{{- return (dict "key" $k "val" $v) -}}
+{{- toYaml (dict "key" $k "val" $v) -}}
 {{- end -}}
 
-{{/*
-  Собрать ConfigMap data из dotenv.
-  Аргументы (dict):
-    dotenv: string
-    strip: bool  (stripPrefixes)
-*/}}
+{{/* ===== cmData: из dotenv собрать YAML-map для ConfigMap ===== */}}
 {{- define "env.cmData" -}}
 {{- $dotenv := .dotenv | default "" -}}
 {{- $strip := .strip | default true -}}
-{{- $lines := include "env.parseLines" $dotenv | fromYamlArray -}}
+{{- $lines := (include "env.parseLines" $dotenv) | fromYaml -}}
 {{- $data := dict -}}
 {{- range $lines }}
-  {{- $pair := (include "env.splitKV" . | fromYaml) -}}
+  {{- $pair := (include "env.splitKV" .) | fromYaml -}}
   {{- $k := $pair.key -}}
   {{- $v := $pair.val -}}
   {{- if hasPrefix $k "ENV__" }}
-    {{- $name := (cond $strip (regexReplaceAll "^ENV__" "" $k) $k) -}}
+    {{- $name := ternary (regexReplaceAll "^ENV__" "" $k) $k $strip -}}
     {{- $_ := set $data $name $v -}}
   {{- end }}
 {{- end }}
-{{- return $data -}}
+{{- toYaml $data -}}
 {{- end -}}
 
-{{/*
-  Собрать Secret data из dotenv (stringData).
-  Аргументы (dict):
-    dotenv: string
-    strip: bool
-*/}}
+{{/* ===== secretData: из dotenv собрать YAML-map для Secret.stringData ===== */}}
 {{- define "env.secretData" -}}
 {{- $dotenv := .dotenv | default "" -}}
 {{- $strip := .strip | default true -}}
-{{- $lines := include "env.parseLines" $dotenv | fromYamlArray -}}
+{{- $lines := (include "env.parseLines" $dotenv) | fromYaml -}}
 {{- $data := dict -}}
 {{- range $lines }}
-  {{- $pair := (include "env.splitKV" . | fromYaml) -}}
+  {{- $pair := (include "env.splitKV" .) | fromYaml -}}
   {{- $k := $pair.key -}}
   {{- $v := $pair.val -}}
   {{- if hasPrefix $k "SECRET__" }}
-    {{- $name := (cond $strip (regexReplaceAll "^SECRET__" "" $k) $k) -}}
+    {{- $name := ternary (regexReplaceAll "^SECRET__" "" $k) $k $strip -}}
     {{- $_ := set $data $name $v -}}
   {{- end }}
 {{- end }}
-{{- return $data -}}
+{{- toYaml $data -}}
 {{- end -}}
 
-{{/*
-  Имена ресурсов
-*/}}
+{{/* ===== имена ресурсов ===== */}}
 {{- define "env.cmName" -}}
-{{- $ := . -}}
-{{- default (printf "%s-env" $.Release.Name) $.Values.envFrom.configMapName -}}
+{{- default (printf "%s-env" .Release.Name) .Values.envFrom.configMapName -}}
 {{- end -}}
 {{- define "env.secretName" -}}
-{{- $ := . -}}
-{{- default (printf "%s-secret" $.Release.Name) $.Values.envFrom.secretName -}}
+{{- default (printf "%s-secret" .Release.Name) .Values.envFrom.secretName -}}
 {{- end -}}
 
-{{/*
-  Чексуммируем сырой dotenv, чтобы триггерить rollout
-*/}}
+{{/* ===== checksum для рестарта подов при изменении файла ===== */}}
 {{- define "env.dotenvChecksum" -}}
 {{- sha256sum (default "" .Values.envFrom.dotenv) -}}
 {{- end -}}
