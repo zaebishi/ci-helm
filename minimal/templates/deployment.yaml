@@ -6,7 +6,7 @@ metadata:
     app.kubernetes.io/name: {{ .Release.Name }}
     app.kubernetes.io/instance: {{ .Release.Name }}
 spec:
-  replicas: 1
+  replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
       app.kubernetes.io/instance: {{ .Release.Name }}
@@ -15,6 +15,8 @@ spec:
       labels:
         app.kubernetes.io/name: {{ .Release.Name }}
         app.kubernetes.io/instance: {{ .Release.Name }}
+      annotations:
+        checksum/dotenv: "{{ include "env.dotenvChecksum" . }}"
     spec:
       containers:
         - name: app
@@ -23,4 +25,25 @@ spec:
           ports:
             - name: http
               containerPort: {{ .Values.container.port }}
-          # liveness/readiness убраны для минималки
+
+          {{- /* определяем: есть ли что монтировать из CM/Secret */ -}}
+          {{- $cmData := (include "env.cmData" (dict "dotenv" .Values.envFrom.dotenv "strip" .Values.envFrom.stripPrefixes) | fromYaml) -}}
+          {{- $secData := (include "env.secretData" (dict "dotenv" .Values.envFrom.dotenv "strip" .Values.envFrom.stripPrefixes) | fromYaml) -}}
+          {{- $cmExplicit := ne (.Values.envFrom.configMapName | default "") "" -}}
+          {{- $secExplicit := ne (.Values.envFrom.secretName | default "") "" -}}
+          {{- $hasCM := or $cmExplicit (gt (len $cmData) 0) -}}
+          {{- $hasSEC := or $secExplicit (gt (len $secData) 0) -}}
+          {{- $cmName := include "env.cmName" . -}}
+          {{- $secName := include "env.secretName" . -}}
+
+          {{- if or $hasCM $hasSEC }}
+          envFrom:
+            {{- if $hasCM }}
+            - configMapRef:
+                name: {{ $cmName }}
+            {{- end }}
+            {{- if $hasSEC }}
+            - secretRef:
+                name: {{ $secName }}
+            {{- end }}
+          {{- end }}

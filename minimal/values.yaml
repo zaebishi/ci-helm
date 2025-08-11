@@ -1,3 +1,5 @@
+replicaCount: 1
+
 image:
   repository: ""     # CI заполнит
   tag: ""            # CI заполнит
@@ -19,5 +21,11 @@ ingress:
     # clusterIssuer и secretName можно не указывать — есть дефолты
     # clusterIssuer: letsencrypt-prod
     # secretName: ""
-    
+
+envFrom:
+  dotenv: ""                 # передаём через --set-file envFrom.dotenv=...
+  configMapName: ""          # по умолчанию <release>-env
+  secretName: ""             # по умолчанию <release>-secret
+  stripPrefixes: true        # <-- если true: ENV__/SECRET__ срезаются; если false — ключи остаются как есть
+
 resources: {}
