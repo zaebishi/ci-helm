@@ -1,10 +1,12 @@
-{{/* ===== parseLines: вернёт YAML-массив строк (без пустых и #комментариев) ===== */}}
+{{/* ===== parseLines: список строк без пустых/комментов, CRLF и BOM ===== */}}
 {{- define "env.parseLines" -}}
-{{- $dotenv := . | default "" -}}
-{{- $lines := splitList "\n" $dotenv -}}
+{{- $raw := . | default "" -}}
+{{- /* убираем CR и BOM в начале каждой строки */ -}}
+{{- $noCR := regexReplaceAll "\r" $raw "" -}}
+{{- $lines := splitList "\n" $noCR -}}
 {{- $clean := list -}}
 {{- range $lines }}
-  {{- $line := trim . -}}
+  {{- $line := regexReplaceAll "^\uFEFF" (trim .) "" -}}
   {{- if and $line (not (hasPrefix $line "#")) }}
     {{- $clean = append $clean $line -}}
   {{- end }}

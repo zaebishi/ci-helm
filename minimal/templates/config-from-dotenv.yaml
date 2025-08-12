@@ -1,9 +1,12 @@
-{{- $cmData := (include "env.cmData" (dict "dotenv" .Values.envFrom.dotenv "strip" .Values.envFrom.stripPrefixes) | fromYaml) -}}
-{{- if gt (len $cmData) 0 }}
+{{- $dotenv := .Values.envFrom.dotenv | default "" -}}
+{{- $cmData := (include "env.cmData" (dict "dotenv" $dotenv "strip" .Values.envFrom.stripPrefixes) | fromYaml) -}}
+{{- if $dotenv }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: {{ include "env.cmName" . }}
+  annotations:
+    env.zota/debug: "cm-keys={{ join \",\" (keys $cmData) }}"
 data:
 {{- range $k, $v := $cmData }}
   {{ $k }}: {{ $v | quote }}
