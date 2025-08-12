@@ -1,9 +1,12 @@
-{{/* ===== parseLines: список строк без пустых/комментов, CRLF и BOM ===== */}}
+{{/* ===== parseLines: список строк без пустых/комментов, CRLF/BOM; раскодировать \n ===== */}}
 {{- define "env.parseLines" -}}
 {{- $raw := . | default "" -}}
-{{- /* убираем CR и BOM в начале каждой строки */ -}}
-{{- $noCR := regexReplaceAll "\r" $raw "" -}}
-{{- $lines := splitList "\n" $noCR -}}
+{{- /* убираем CR */ -}}
+{{- $s1 := regexReplaceAll "\r" $raw "" -}}
+{{- /* превращаем литералы \n в реальные переводы строки */ -}}
+{{- $s2 := regexReplaceAll "\\\\n" "\n" $s1 -}}
+{{- /* split по LF */ -}}
+{{- $lines := splitList "\n" $s2 -}}
 {{- $clean := list -}}
 {{- range $lines }}
   {{- $line := regexReplaceAll "^\uFEFF" (trim .) "" -}}
