@@ -20,7 +20,7 @@ spec:
         {{- toYaml . | nindent 8 }}
         {{- end }}
     spec:
-      imagePullSecrets: 
+      imagePullSecrets:
         - name: {{ .Values.registry.pullSecretName | default "gitlab-registry-ro" }}
       containers:
         - name: app
@@ -29,15 +29,19 @@ spec:
           ports:
             - name: http
               containerPort: {{ .Values.container.port }}
-          {{- if .Values.envFrom.enabled }}
+
+          {{- /* === ВАЖНО: envFrom только если есть что монтировать === */ -}}
           {{- $cmDefault := printf "%s-env" .Release.Name }}
           {{- $secDefault := printf "%s-secret" .Release.Name }}
+          {{- $hasCM := and (.Values.envFrom.enabled) (.Values.envFrom.publicYaml) }}
+          {{- $hasSEC := and (.Values.envFrom.enabled) (.Values.envFrom.secretYaml) }}
+          {{- if or $hasCM $hasSEC }}
           envFrom:
-            {{- if or .Values.envFrom.configMapName .Values.envFrom.publicYaml }}
+            {{- if $hasCM }}
             - configMapRef:
                 name: {{ .Values.envFrom.configMapName | default $cmDefault }}
             {{- end }}
-            {{- if or .Values.envFrom.secretName .Values.envFrom.secretYaml }}
+            {{- if $hasSEC }}
             - secretRef:
                 name: {{ .Values.envFrom.secretName | default $secDefault }}
             {{- end }}
