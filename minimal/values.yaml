@@ -23,9 +23,12 @@ ingress:
     # secretName: ""
 
 envFrom:
-  dotenv: ""                 # передаём через --set-file envFrom.dotenv=...
-  configMapName: ""          # по умолчанию <release>-env
-  secretName: ""             # по умолчанию <release>-secret
-  stripPrefixes: true        # <-- если true: ENV__/SECRET__ срезаются; если false — ключи остаются как есть
+  enabled: false
+  configMapName: ""
+  secretName: ""
+  publicYaml: ""   # прилетает через --set-file
+  secretYaml: ""   # прилетает через --set-file
+  
+podAnnotations: {}
 
 resources: {}

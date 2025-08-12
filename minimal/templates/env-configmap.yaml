@@ -1,0 +1,8 @@
+{{- if and .Values.envFrom.enabled .Values.envFrom.publicYaml }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ default (printf "%s-env" (include "chart.fullname" .)) .Values.envFrom.configMapName }}
+data:
+{{ .Values.envFrom.publicYaml | nindent 2 }}
+{{- end }}

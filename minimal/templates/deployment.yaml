@@ -16,7 +16,9 @@ spec:
         app.kubernetes.io/name: {{ .Release.Name }}
         app.kubernetes.io/instance: {{ .Release.Name }}
       annotations:
-        checksum/dotenv: "{{ include "env.dotenvChecksum" . }}"
+        {{- with .Values.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
     spec:
       containers:
         - name: app
@@ -25,25 +27,14 @@ spec:
           ports:
             - name: http
               containerPort: {{ .Values.container.port }}
-
-          {{- /* определяем: есть ли что монтировать из CM/Secret */ -}}
-          {{- $cmData := (include "env.cmData" (dict "dotenv" .Values.envFrom.dotenv "strip" .Values.envFrom.stripPrefixes) | fromYaml) -}}
-          {{- $secData := (include "env.secretData" (dict "dotenv" .Values.envFrom.dotenv "strip" .Values.envFrom.stripPrefixes) | fromYaml) -}}
-          {{- $cmExplicit := ne (.Values.envFrom.configMapName | default "") "" -}}
-          {{- $secExplicit := ne (.Values.envFrom.secretName | default "") "" -}}
-          {{- $hasCM := or $cmExplicit (gt (len $cmData) 0) -}}
-          {{- $hasSEC := or $secExplicit (gt (len $secData) 0) -}}
-          {{- $cmName := include "env.cmName" . -}}
-          {{- $secName := include "env.secretName" . -}}
-
-          {{- if or $hasCM $hasSEC }}
+          {{- if .Values.envFrom.enabled }}
           envFrom:
-            {{- if $hasCM }}
+            {{- if .Values.envFrom.configMapName }}
             - configMapRef:
-                name: {{ $cmName }}
+                name: {{ .Values.envFrom.configMapName }}
             {{- end }}
-            {{- if $hasSEC }}
+            {{- if .Values.envFrom.secretName }}
             - secretRef:
-                name: {{ $secName }}
+                name: {{ .Values.envFrom.secretName }}
             {{- end }}
           {{- end }}
