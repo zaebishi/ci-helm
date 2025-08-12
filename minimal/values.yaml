@@ -35,3 +35,14 @@ registry:
   pullSecretName: gitlab-registry-ro
 
 resources: {}
+
+postgres:
+  enabled: false
+  auth:
+    username: app
+    password: "app"
+    database: app
+  primary:
+    persistence:
+      enabled: true  
+      size: 8Gi
