@@ -7,5 +7,5 @@ dependencies:
   - name: postgresql
     alias: postgres
     version: 15.x.x
-    repository: https://charts.bitnami.com/bitnami
+    repository: https://mirror.yandex.ru/helm/charts.bitnami.com
     condition: postgres.enabled
