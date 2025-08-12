@@ -28,13 +28,15 @@ spec:
             - name: http
               containerPort: {{ .Values.container.port }}
           {{- if .Values.envFrom.enabled }}
+          {{- $cmDefault := printf "%s-env" .Release.Name }}
+          {{- $secDefault := printf "%s-secret" .Release.Name }}
           envFrom:
-            {{- if .Values.envFrom.configMapName }}
+            {{- if or .Values.envFrom.configMapName .Values.envFrom.publicYaml }}
             - configMapRef:
-                name: {{ .Values.envFrom.configMapName }}
+                name: {{ .Values.envFrom.configMapName | default $cmDefault }}
             {{- end }}
-            {{- if .Values.envFrom.secretName }}
+            {{- if or .Values.envFrom.secretName .Values.envFrom.secretYaml }}
             - secretRef:
-                name: {{ .Values.envFrom.secretName }}
+                name: {{ .Values.envFrom.secretName | default $secDefault }}
             {{- end }}
           {{- end }}

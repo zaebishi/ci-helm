@@ -2,7 +2,8 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ default (printf "%s-env" (include "chart.fullname" .)) .Values.envFrom.configMapName }}
+  {{- $cmDefault := printf "%s-env" .Release.Name }}
+  name: {{ .Values.envFrom.configMapName | default $cmDefault }}
 data:
 {{ .Values.envFrom.publicYaml | nindent 2 }}
 {{- end }}
