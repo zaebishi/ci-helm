@@ -32,7 +32,7 @@
 {{- $data := dict -}}
 {{- range $lines }}
   {{- $pair := (include "env.splitKV" .) | fromYaml -}}
-  {{- $k := $pair.key -}}
+  {{- $k := trim $pair.key -}}
   {{- $v := $pair.val -}}
   {{- if hasPrefix $k "ENV__" }}
     {{- $name := ternary (regexReplaceAll "^ENV__" "" $k) $k $strip -}}
@@ -50,7 +50,7 @@
 {{- $data := dict -}}
 {{- range $lines }}
   {{- $pair := (include "env.splitKV" .) | fromYaml -}}
-  {{- $k := $pair.key -}}
+  {{- $k := trim $pair.key -}}
   {{- $v := $pair.val -}}
   {{- if hasPrefix $k "SECRET__" }}
     {{- $name := ternary (regexReplaceAll "^SECRET__" "" $k) $k $strip -}}
