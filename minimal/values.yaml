@@ -31,4 +31,7 @@ envFrom:
   
 podAnnotations: {}
 
+imagePullSecrets:
+  - name: gitlab-registry-ro
+
 resources: {}
