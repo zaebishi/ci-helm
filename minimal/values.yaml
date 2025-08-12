@@ -31,7 +31,11 @@ envFrom:
   
 podAnnotations: {}
 
-imagePullSecrets:
-  - name: gitlab-registry-ro
+registry:
+  pullSecretName: gitlab-registry-ro
+
+hooks:
+  serviceAccount: default   # или отдельный SA, если нужно
+  waitSeconds: 60
 
 resources: {}

@@ -7,8 +7,6 @@ metadata:
     app.kubernetes.io/instance: {{ .Release.Name }}
 spec:
   replicas: {{ .Values.replicaCount }}
-  imagePullSecrets:
-    {{- toYaml .Values.imagePullSecrets | nindent 8 }}
   selector:
     matchLabels:
       app.kubernetes.io/instance: {{ .Release.Name }}
@@ -22,6 +20,8 @@ spec:
         {{- toYaml . | nindent 8 }}
         {{- end }}
     spec:
+      imagePullSecrets: 
+        - name: {{ .Values.registry.pullSecretName | default "gitlab-registry-ro" }}
       containers:
         - name: app
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
