@@ -4,6 +4,8 @@ kind: ConfigMap
 metadata:
   {{- $cmDefault := printf "%s-env" .Release.Name }}
   name: {{ .Values.envFrom.configMapName | default $cmDefault }}
+  annotations:
+    env-checksum: {{ .Values.podAnnotations.checksum | quote }}
 data:
 {{ .Values.envFrom.publicYaml | nindent 2 }}
 {{- end }}
