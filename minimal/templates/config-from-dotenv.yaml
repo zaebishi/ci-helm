@@ -6,7 +6,7 @@ kind: ConfigMap
 metadata:
   name: {{ include "env.cmName" . }}
   annotations:
-    env.zota/debug: "cm-keys={{ join \",\" (keys $cmData) }}"
+    env.zota/debug: {{ printf "cm-keys=%s" (join "," (keys $cmData)) | quote }}
 data:
 {{- range $k, $v := $cmData }}
   {{ $k }}: {{ $v | quote }}
