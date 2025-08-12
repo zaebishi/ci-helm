@@ -24,7 +24,6 @@
 {{- toYaml (dict "key" $k "val" $v) -}}
 {{- end -}}
 
-{{/* ===== cmData: из dotenv собрать YAML-map для ConfigMap ===== */}}
 {{- define "env.cmData" -}}
 {{- $dotenv := .dotenv | default "" -}}
 {{- $strip := .strip | default true -}}
@@ -34,7 +33,7 @@
   {{- $pair := (include "env.splitKV" .) | fromYaml -}}
   {{- $k := trim $pair.key -}}
   {{- $v := $pair.val -}}
-  {{- if hasPrefix $k "ENV__" }}
+  {{- if regexMatch "^ENV__" $k }}
     {{- $name := ternary (regexReplaceAll "^ENV__" "" $k) $k $strip -}}
     {{- $_ := set $data $name $v -}}
   {{- end }}
@@ -42,7 +41,6 @@
 {{- toYaml $data -}}
 {{- end -}}
 
-{{/* ===== secretData: из dotenv собрать YAML-map для Secret.stringData ===== */}}
 {{- define "env.secretData" -}}
 {{- $dotenv := .dotenv | default "" -}}
 {{- $strip := .strip | default true -}}
@@ -52,7 +50,7 @@
   {{- $pair := (include "env.splitKV" .) | fromYaml -}}
   {{- $k := trim $pair.key -}}
   {{- $v := $pair.val -}}
-  {{- if hasPrefix $k "SECRET__" }}
+  {{- if regexMatch "^SECRET__" $k }}
     {{- $name := ternary (regexReplaceAll "^SECRET__" "" $k) $k $strip -}}
     {{- $_ := set $data $name $v -}}
   {{- end }}
