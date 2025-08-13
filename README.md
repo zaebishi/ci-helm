@@ -4,16 +4,22 @@
 
 ## Доступные чарты
 
-- **[nestjs](./nestjs/)** - Универсальный чарт для развертывания NestJS приложений
+- **[minimal](./minimal/)** - Минималистичный универсальный чарт с поддержкой PostgreSQL и переменных окружения
 
 ## Использование
 
 ```bash
 # Установка чарта
-helm install my-app ./chart-name/
+helm install my-app ./minimal/
 
 # Установка с кастомными значениями
-helm install my-app ./chart-name/ -f values.yaml
+helm install my-app ./minimal/ -f my-values.yaml
+
+# Обновление релиза
+helm upgrade my-app ./minimal/ -f my-values.yaml
+
+# Удаление релиза
+helm uninstall my-app
 ```
 
 ## Требования
