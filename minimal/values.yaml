@@ -16,6 +16,7 @@ ingress:
   enabled: false
   className: nginx
   host: ""
+  proxyBodySize: "20m"
   tls:
     enabled: false
     # clusterIssuer и secretName можно не указывать — есть дефолты
