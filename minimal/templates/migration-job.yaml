@@ -1,0 +1,47 @@
+{{- if .Values.migration.enabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: "{{ include "minimal.fullname" . }}-migration-{{ .Release.Revision }}"
+  labels:
+    {{- include "minimal.labels" . | nindent 4 }}
+    app.kubernetes.io/component: migration
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-weight": "-5"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+spec:
+  template:
+    metadata:
+      name: "{{ include "minimal.fullname" . }}-migration"
+      labels:
+        {{- include "minimal.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: migration
+      annotations:
+        env-checksum: {{ .Values.podAnnotations.checksum | quote }}
+    spec:
+      restartPolicy: Never
+      containers:
+      - name: migration
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+        command: 
+          {{- toYaml .Values.migration.command | nindent 10 }}
+        
+        {{- if .Values.envFrom.enabled }}
+        envFrom:
+        {{- if .Values.envFrom.publicYaml }}
+        - configMapRef:
+            name: {{ .Values.envFrom.configMapName | default (printf "%s-env" .Release.Name) }}
+        {{- end }}
+        {{- if .Values.envFrom.secretYaml }}
+        - secretRef:
+            name: {{ .Values.envFrom.secretName | default (printf "%s-secret" .Release.Name) }}
+        {{- end }}
+        {{- end }}
+        
+        resources:
+          {{- toYaml .Values.migration.resources | nindent 10 }}
+        
+  backoffLimit: {{ .Values.migration.backoffLimit | default 3 }}
+  activeDeadlineSeconds: {{ .Values.migration.activeDeadlineSeconds | default 600 }}
+{{- end }}

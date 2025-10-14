@@ -30,12 +30,29 @@ envFrom:
   publicYaml: ""   # прилетает через --set-file
   secretYaml: ""   # прилетает через --set-file
   
-podAnnotations: {}
+podAnnotations:
+  checksum: ""  # будет заполнен автоматически для отслеживания изменений env
 
 registry:
   pullSecretName: gitlab-registry-ro
 
 resources: {}
+
+migration:
+  enabled: false
+  command:
+    - "/bin/sh"
+    - "-c"
+    - "echo 'Migration completed'"
+  resources:
+    requests:
+      memory: "128Mi"
+      cpu: "100m"
+    limits:
+      memory: "256Mi"
+      cpu: "200m"
+  backoffLimit: 3
+  activeDeadlineSeconds: 600
 
 postgres:
   enabled: false
