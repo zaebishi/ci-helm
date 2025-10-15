@@ -2,9 +2,9 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: "{{ include "minimal.fullname" . }}-migration-{{ .Release.Revision }}"
+  name: "{{ .Release.Name }}-migration-{{ .Release.Revision }}"
   labels:
-    {{- include "minimal.labels" . | nindent 4 }}
+    app.kubernetes.io/name: {{ .Release.Name }}
     app.kubernetes.io/component: migration
   annotations:
     "helm.sh/hook": pre-install,pre-upgrade
@@ -13,9 +13,9 @@ metadata:
 spec:
   template:
     metadata:
-      name: "{{ include "minimal.fullname" . }}-migration"
+      name: "{{ .Release.Name }}-migration"
       labels:
-        {{- include "minimal.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/name: {{ .Release.Name }}
         app.kubernetes.io/component: migration
       annotations:
         env-checksum: {{ .Values.podAnnotations.checksum | quote }}
