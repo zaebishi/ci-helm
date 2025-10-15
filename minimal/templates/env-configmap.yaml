@@ -6,6 +6,11 @@ metadata:
   name: {{ .Values.envFrom.configMapName | default $cmDefault }}
   annotations:
     env-checksum: {{ .Values.podAnnotations.checksum | quote }}
+    {{- if .Values.migration.enabled }}
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-weight": "-10"
+    "helm.sh/hook-delete-policy": before-hook-creation
+    {{- end }}
 data:
 {{ .Values.envFrom.publicYaml | nindent 2 }}
 {{- end }}
