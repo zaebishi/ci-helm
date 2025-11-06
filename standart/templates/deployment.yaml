@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}
+  labels:
+    app.kubernetes.io/name: {{ .Release.Name }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ .Release.Name }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+      annotations:
+        {{- with .Values.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      imagePullSecrets:
+        - name: {{ .Values.registry.pullSecretName | default "gitlab-registry-ro" }}
+      containers:
+        - name: app
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.container.port }}
+
+          {{- /* === envFrom для создаваемых чартом ресурсов === */ -}}
+          {{- $cmDefault := printf "%s-env" .Release.Name }}
+          {{- $secDefault := printf "%s-secret" .Release.Name }}
+          {{- $hasCM := and (.Values.envFrom.enabled) (.Values.envFrom.publicYaml) }}
+          {{- $hasSEC := and (.Values.envFrom.enabled) (.Values.envFrom.secretYaml) }}
+          
+          {{- /* === envFrom для существующих секретов и ConfigMaps === */ -}}
+          {{- $hasIncludeSecrets := and (.Values.includeVariables.enabled) (gt (len .Values.includeVariables.secrets) 0) }}
+          {{- $hasIncludeConfigMaps := and (.Values.includeVariables.enabled) (gt (len .Values.includeVariables.configMaps) 0) }}
+          
+          {{- if or $hasCM $hasSEC $hasIncludeSecrets $hasIncludeConfigMaps }}
+          envFrom:
+            {{- if $hasCM }}
+            - configMapRef:
+                name: {{ .Values.envFrom.configMapName | default $cmDefault }}
+            {{- end }}
+            {{- if $hasSEC }}
+            - secretRef:
+                name: {{ .Values.envFrom.secretName | default $secDefault }}
+            {{- end }}
+            {{- if $hasIncludeSecrets }}
+            {{- range .Values.includeVariables.secrets }}
+            - secretRef:
+                name: {{ . }}
+            {{- end }}
+            {{- end }}
+            {{- if $hasIncludeConfigMaps }}
+            {{- range .Values.includeVariables.configMaps }}
+            - configMapRef:
+                name: {{ . }}
+            {{- end }}
+            {{- end }}
+          {{- end }}

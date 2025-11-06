@@ -1,0 +1,75 @@
+replicaCount: 1
+
+image:
+  repository: "" # CI заполнит
+  tag: "" # CI заполнит
+  pullPolicy: IfNotPresent
+
+container:
+  port: 9000
+
+service:
+  type: ClusterIP
+  port: 9000
+
+ingress:
+  enabled: false
+  className: nginx
+  host: ""
+  proxyBodySize: "20m"
+  tls:
+    enabled: false
+    # clusterIssuer и secretName можно не указывать — есть дефолты
+    # clusterIssuer: letsencrypt-prod
+    # secretName: ""
+
+envFrom:
+  enabled: false
+  configMapName: ""
+  secretName: ""
+  publicYaml: "" # прилетает через --set-file
+  secretYaml: "" # прилетает через --set-file
+
+includeVariables:
+  enabled: false
+  secrets:
+    - existing-secret-name-1
+    - existing-secret-name-2
+  configMaps:
+    - existing-configmap-name-1
+    - existing-configmap-name-2
+
+podAnnotations:
+  checksum: "" # будет заполнен автоматически для отслеживания изменений env
+
+registry:
+  pullSecretName: gitlab-registry-ro
+
+resources: {}
+
+scriptJob:
+  enabled: false
+  command:
+    - "/bin/sh"
+    - "-c"
+    - "echo 'Script job completed'"
+  resources:
+    requests:
+      memory: "128Mi"
+      cpu: "100m"
+    limits:
+      memory: "256Mi"
+      cpu: "200m"
+  backoffLimit: 3
+  activeDeadlineSeconds: 600
+
+postgres:
+  enabled: false
+  auth:
+    username: app
+    password: "app"
+    database: app
+  primary:
+    persistence:
+      enabled: true
+      size: 8Gi

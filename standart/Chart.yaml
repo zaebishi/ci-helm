@@ -1,0 +1,11 @@
+apiVersion: v2
+name: minimal
+version: 0.1.0
+type: application
+
+dependencies:
+  - name: postgresql
+    alias: postgres
+    version: 15.x.x
+    repository: https://mirror.yandex.ru/helm/charts.bitnami.com
+    condition: postgres.enabled
