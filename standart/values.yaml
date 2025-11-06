@@ -32,12 +32,8 @@ envFrom:
 
 includeVariables:
   enabled: false
-  secrets:
-    - existing-secret-name-1
-    - existing-secret-name-2
-  configMaps:
-    - existing-configmap-name-1
-    - existing-configmap-name-2
+  secrets: []
+  configMaps: []
 
 podAnnotations:
   checksum: "" # будет заполнен автоматически для отслеживания изменений env
