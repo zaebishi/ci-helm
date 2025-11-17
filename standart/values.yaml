@@ -70,6 +70,11 @@ postgres:
     username: app
     password: "app"
     database: app
+  # Настройки сервиса PostgreSQL
+  service:
+    type: ClusterIP # ClusterIP, NodePort, LoadBalancer
+    nodePorts:
+      postgresql: "" # Порт NodePort (30000-32767), используется только при type: NodePort или LoadBalancer
   primary:
     persistence:
       enabled: true
