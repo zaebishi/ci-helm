@@ -61,6 +61,11 @@ scriptJob:
 
 postgres:
   enabled: false
+  # Кастомный образ PostgreSQL
+  image:
+    registry: docker.io
+    repository: bitnamilegacy/postgresql
+    tag: 17.6.0-debian-12-r4
   auth:
     username: app
     password: "app"

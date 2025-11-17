@@ -6,6 +6,6 @@ type: application
 dependencies:
   - name: postgresql
     alias: postgres
-    version: 15.x.x
+    version: 17.x.x
     repository: https://mirror.yandex.ru/helm/charts.bitnami.com
     condition: postgres.enabled
