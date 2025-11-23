@@ -67,9 +67,10 @@ postgres:
     repository: bitnamilegacy/postgresql
     tag: 17.6.0-debian-12-r4
   auth:
-    username: app
-    password: "app"
-    database: app
+    existingSecret: name-secret-postgres
+    usernameKey: postgres-username   # ключ внутри Secret с username (опционально)
+    passwordKey: postgres-password   # ключ внутри Secret с паролем
+    databaseKey: postgres-database   # ключ внутри Secret с названием БД
   # Настройки сервиса PostgreSQL
   service:
     type: ClusterIP # ClusterIP, NodePort, LoadBalancer
